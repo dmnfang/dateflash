@@ -268,11 +268,11 @@ body::before {
   gap: 4px;
   min-height: 0;
 }
-.g-cell .ge { font-size:24px; }
-.g-cell .gn { font-size:13px; font-weight:900; line-height:1.1; }
-.g-cell .gd { display:flex; align-items:flex-start; font-size:22px; font-weight:900; line-height:1; }
+.g-cell .ge { font-size: clamp(28px, 4vh, 56px); }
+.g-cell .gn { font-size: clamp(18px, 2.5vh, 36px); font-weight:900; line-height:1.1; }
+.g-cell .gd { display:flex; align-items:flex-start; font-size: clamp(24px, 3.5vh, 48px); font-weight:900; line-height:1; }
 .g-cell .gs { font-size:0.42em; font-weight:900; padding-top:0.18em; }
-.g-cell .gw { font-size:10px; font-weight:800; opacity:0.7; }
+.g-cell .gw { font-size: clamp(11px, 1.5vh, 18px); font-weight:800; opacity:0.7; }
 
 /* ══ CHALLENGE TIMER ══ */
 #timer-float {
