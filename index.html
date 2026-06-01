@@ -242,24 +242,31 @@ body::before {
   display: none;
   width: 100%; height: 100%;
   overflow-y: auto;
-  padding: 24px 28px;
-  align-items: flex-start;
+  padding: 16px 20px;
+  align-items: stretch;
   justify-content: center;
 }
 #r-grid.active { display: flex; }
 
-.g-grid { display:grid; gap:10px; width:100%; }
-.g-grid.months { grid-template-columns: repeat(6,1fr); max-width:900px; }
-.g-grid.dates  { grid-template-columns: repeat(8,1fr); max-width:1100px; }
+.g-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+.g-grid.months { grid-template-columns: repeat(6,1fr); grid-template-rows: repeat(2,1fr); }
+.g-grid.dates  { grid-template-columns: repeat(8,1fr); grid-template-rows: repeat(4,1fr); }
 
 .g-cell {
   background: var(--surface);
   border-radius: var(--radius-md);
   border: 1.5px solid var(--border);
-  padding: 14px 8px;
+  padding: 8px;
   text-align: center;
-  display: flex; flex-direction:column;
-  align-items:center; gap:5px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+  min-height: 0;
 }
 .g-cell .ge { font-size:24px; }
 .g-cell .gn { font-size:13px; font-weight:900; line-height:1.1; }
