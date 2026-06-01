@@ -224,13 +224,13 @@ body::before {
 }
 
 /* ══ TYPOGRAPHY ══ */
-.m-emoji { font-size: clamp(60px,10vh,110px); display:block; margin-bottom:8px; }
-.m-name  { font-size: clamp(64px,14vh,148px); font-weight:900; line-height:1; letter-spacing:-0.025em; }
+.m-emoji { font-size: clamp(80px,14vh,160px); display:block; margin-bottom:16px; }
+.m-name  { font-size: clamp(100px,22vh,220px); font-weight:900; line-height:1; letter-spacing:-0.025em; }
 
 .d-wrap  { display:flex; flex-direction:column; align-items:center; gap:16px; }
-.d-num   { font-size:clamp(96px,20vh,200px); font-weight:900; line-height:1; letter-spacing:-0.03em; display:flex; align-items:flex-start; }
+.d-num   { font-size:clamp(140px,28vh,280px); font-weight:900; line-height:1; letter-spacing:-0.03em; display:flex; align-items:flex-start; }
 .suf     { font-size:0.36em; font-weight:900; padding-top:0.22em; letter-spacing:0; }
-.d-word  { font-size:clamp(40px,8vh,90px); font-weight:800; line-height:1; letter-spacing:-0.015em; }
+.d-word  { font-size:clamp(60px,12vh,120px); font-weight:800; line-height:1; letter-spacing:-0.015em; }
 
 .co-wrap  { display:flex; flex-direction:column; align-items:center; gap:10px; }
 .co-month { font-size:clamp(28px,5vh,58px); font-weight:900; display:flex; align-items:center; gap:10px; }
@@ -268,11 +268,11 @@ body::before {
   gap: 4px;
   min-height: 0;
 }
-.g-cell .ge { font-size: clamp(28px, 4vh, 56px); }
-.g-cell .gn { font-size: clamp(18px, 2.5vh, 36px); font-weight:900; line-height:1.1; }
-.g-cell .gd { display:flex; align-items:flex-start; font-size: clamp(24px, 3.5vh, 48px); font-weight:900; line-height:1; }
+.g-cell .ge { font-size: clamp(36px, 6vh, 80px); }
+.g-cell .gn { font-size: clamp(24px, 4vh, 52px); font-weight:900; line-height:1.1; }
+.g-cell .gd { display:flex; align-items:flex-start; font-size: clamp(32px, 5vh, 64px); font-weight:900; line-height:1; }
 .g-cell .gs { font-size:0.42em; font-weight:900; padding-top:0.18em; }
-.g-cell .gw { font-size: clamp(11px, 1.5vh, 18px); font-weight:800; opacity:0.7; }
+.g-cell .gw { font-size: clamp(14px, 2vh, 24px); font-weight:800; opacity:0.7; }
 
 /* ══ CHALLENGE TIMER ══ */
 #timer-float {
@@ -697,7 +697,6 @@ document.addEventListener('keydown',e=>{
 
 rRender();
 hRender();
-document.getElementById('timer-float').classList.add('visible');
 </script>
 </body>
 </html>
