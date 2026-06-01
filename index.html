@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Date Flash</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #12111A;
+  --surface:   #1C1A2E;
+  --surface2:  #242038;
+  --border:    #2E2B44;
+  --purple:    #7B5CE5;
+  --purple-dim:#4A3A8A;
+  --gold:      #F5C842;
+  --gold-dim:  #A07A10;
+  --muted:     #6B68A8;
+  --white:     #F5F4FF;
+
+  --review:    #7B5CE5;
+  --challenge: #F5C842;
+  --holiday:   #7dcfa0;
+
+  --jan:#7eb8f7; --feb:#f7a8c4; --mar:#7dcfa0; --apr:#b5e88a;
+  --may:#F5C842; --jun:#ffab6e; --jul:#ff8080; --aug:#ff9f4a;
+  --sep:#c4a0e8; --oct:#e8885a; --nov:#a8c4a0; --dec:#80d4f0;
+
+  --c1:#ff8080; --c2:#ffb347; --c3:#7dcfa0; --c4:#7eb8f7;
+  --c5:#f7a8c4; --c6:#b5e88a; --c7:#ff7f7f; --c8:#80d4f0;
+  --c9:#ffa07a; --c10:#d4a8f0;
+  --teens:#c8a0e8;
+  --tens:#F5C842;
+
+  --tb-h: 56px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events:none; z-index:0;
+}
+
+/* ══ TOOLBAR ══ */
+#toolbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--tb-h);
+  background: rgba(18,17,26,0.97);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+/* Breadcrumb */
+.tb-breadcrumb {
+  display: flex; align-items: center;
+  gap: 8px; flex-shrink: 0;
+}
+.bc-home {
+  font-size: 16px; font-weight: 900;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+  letter-spacing: 0.02em;
+}
+.bc-home:hover { color: var(--white); }
+.bc-sep {
+  font-size: 14px;
+  color: var(--border);
+}
+.bc-current {
+  font-size: 16px; font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+
+.tb-div {
+  width: 1px; height: 24px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* Mode tabs */
+#tb-modes { display: flex; gap: 4px; flex-shrink: 0; }
+
+.mode-tab {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 800;
+  padding: 6px 16px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.mode-tab:hover { color: var(--white); background: var(--surface2); }
+.mode-tab.active[data-mode="review"]    { background: var(--purple);   color: var(--white); }
+.mode-tab.active[data-mode="challenge"] { background: var(--gold);     color: var(--bg); }
+.mode-tab.active[data-mode="holidays"]  { background: var(--holiday);  color: var(--bg); }
+
+.tb-spacer { flex: 1; }
+
+#tb-right {
+  display: flex; align-items: center;
+  gap: 8px; flex-shrink: 0;
+}
+
+/* Toggle pill group */
+.tog-group {
+  display: flex;
+  background: var(--surface);
+  border-radius: 100px;
+  padding: 3px;
+}
+.tog {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 800;
+  padding: 5px 16px;
+  border-radius: 100px;
+  border: none; cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.14s;
+  white-space: nowrap;
+}
+.tog:hover { color: var(--white); }
+.tog.active { background: var(--surface2); color: var(--white); box-shadow: 0 1px 5px rgba(0,0,0,0.3); }
+
+.tb-counter {
+  font-size: 12px; font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  min-width: 52px; text-align: center;
+}
+
+.tb-btn {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.14s;
+  white-space: nowrap;
+}
+.tb-btn:hover { color: var(--white); border-color: var(--muted); }
+.tb-btn.on { background: var(--white); color: var(--bg); border-color: var(--white); }
+.tb-btn.accent-rev  { background: var(--purple);  color: var(--white); border-color: var(--purple); }
+.tb-btn.accent-chal { background: var(--gold);    color: var(--bg);    border-color: var(--gold); }
+.tb-btn.accent-hol  { background: var(--holiday); color: var(--bg);    border-color: var(--holiday); }
+
+#tb-speed {
+  display: flex; align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+#tb-speed-lbl { font-size: 11px; font-weight: 800; color: var(--muted); }
+#speed-slider {
+  -webkit-appearance: none;
+  width: 90px; height: 4px;
+  border-radius: 2px;
+  background: var(--surface2);
+  outline: none; cursor: pointer;
+}
+#speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+}
+#tb-speed-val { font-size: 12px; font-weight: 900; color: var(--white); min-width: 20px; }
+
+/* ══ CONTENT ══ */
+#content {
+  position: fixed;
+  top: var(--tb-h);
+  left: 0; right: 0; bottom: 0;
+  z-index: 1;
+}
+
+.pane {
+  display: none;
+  width: 100%; height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+.pane.active { display: flex; }
+
+.card-anim {
+  animation: pop 0.24s cubic-bezier(0.34,1.56,0.64,1);
+  text-align: center;
+}
+@keyframes pop {
+  from { opacity:0; transform: scale(0.87) translateY(6px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+/* ══ TYPOGRAPHY ══ */
+.m-emoji { font-size: clamp(60px,10vh,110px); display:block; margin-bottom:8px; }
+.m-name  { font-size: clamp(64px,14vh,148px); font-weight:900; line-height:1; letter-spacing:-0.025em; }
+
+.d-wrap  { display:flex; flex-direction:column; align-items:center; gap:16px; }
+.d-num   { font-size:clamp(96px,20vh,200px); font-weight:900; line-height:1; letter-spacing:-0.03em; display:flex; align-items:flex-start; }
+.suf     { font-size:0.36em; font-weight:900; padding-top:0.22em; letter-spacing:0; }
+.d-word  { font-size:clamp(40px,8vh,90px); font-weight:800; line-height:1; letter-spacing:-0.015em; }
+
+.co-wrap  { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.co-month { font-size:clamp(28px,5vh,58px); font-weight:900; display:flex; align-items:center; gap:10px; }
+.co-num   { font-size:clamp(72px,15vh,160px); font-weight:900; line-height:1; letter-spacing:-0.03em; display:flex; align-items:flex-start; }
+.co-word  { font-size:clamp(30px,6vh,68px); font-weight:800; line-height:1; letter-spacing:-0.015em; }
+
+/* ══ GRID VIEW ══ */
+#r-grid {
+  display: none;
+  width: 100%; height: 100%;
+  overflow-y: auto;
+  padding: 24px 28px;
+  align-items: flex-start;
+  justify-content: center;
+}
+#r-grid.active { display: flex; }
+
+.g-grid { display:grid; gap:10px; width:100%; }
+.g-grid.months { grid-template-columns: repeat(6,1fr); max-width:900px; }
+.g-grid.dates  { grid-template-columns: repeat(8,1fr); max-width:1100px; }
+
+.g-cell {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  padding: 14px 8px;
+  text-align: center;
+  display: flex; flex-direction:column;
+  align-items:center; gap:5px;
+}
+.g-cell .ge { font-size:24px; }
+.g-cell .gn { font-size:13px; font-weight:900; line-height:1.1; }
+.g-cell .gd { display:flex; align-items:flex-start; font-size:22px; font-weight:900; line-height:1; }
+.g-cell .gs { font-size:0.42em; font-weight:900; padding-top:0.18em; }
+.g-cell .gw { font-size:10px; font-weight:800; opacity:0.7; }
+
+/* ══ CHALLENGE TIMER ══ */
+#timer-float {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  width: 90px; height: 90px;
+  display: none;
+  z-index: 50;
+}
+#timer-float.visible { display: block; }
+
+#timer-svg { width:90px; height:90px; transform:rotate(-90deg); }
+#timer-bg  { fill:rgba(18,17,26,0.9); stroke:var(--border); stroke-width:6; }
+#timer-arc { fill:none; stroke:var(--gold); stroke-width:6; stroke-linecap:round;
+             stroke-dasharray:233; stroke-dashoffset:0; transition:stroke-dashoffset 0.15s linear; }
+#timer-num {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; font-weight:900; color:var(--white);
+}
+
+/* ══ HOLIDAYS ══ */
+.h-emoji { font-size:clamp(60px,10vh,110px); display:block; margin-bottom:10px; }
+.h-en    { font-size:clamp(36px,7vh,78px); font-weight:900; color:var(--white); line-height:1.1; letter-spacing:-0.02em; }
+.h-ja    { font-size:clamp(20px,4vh,42px); font-weight:700; color:var(--muted); margin-top:8px; letter-spacing:0.06em; }
+.h-ans   { margin-top:24px; font-size:clamp(28px,5.5vh,60px); font-weight:900;
+           color:var(--gold); letter-spacing:-0.01em;
+           animation: pop 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+</style>
+</head>
+<body>
+
+<!-- ══ TOOLBAR ══ -->
+<div id="toolbar">
+
+  <div class="tb-breadcrumb">
+    <a class="bc-home" href="https://hiroba.ca">Hiroba</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-current">Date Flash</span>
+  </div>
+  <div class="tb-div"></div>
+
+  <div id="tb-modes">
+    <button class="mode-tab active" data-mode="review">📖 Review</button>
+    <button class="mode-tab" data-mode="challenge">⚡ Challenge</button>
+    <button class="mode-tab" data-mode="holidays">🎌 Holidays</button>
+  </div>
+
+  <div class="tb-spacer"></div>
+
+  <div id="tb-right">
+
+    <!-- REVIEW controls -->
+    <div id="ctrl-review" style="display:flex;align-items:center;gap:8px;">
+      <div class="tog-group">
+        <button class="tog active" data-rtype="months">Months</button>
+        <button class="tog" data-rtype="dates">Dates</button>
+      </div>
+      <div class="tb-div"></div>
+      <button class="tb-btn" id="r-grid-btn">⊞ Grid</button>
+      <div class="tb-div"></div>
+      <button class="tb-btn" id="r-prev">←</button>
+      <div class="tb-counter" id="r-counter"></div>
+      <button class="tb-btn" id="r-next">→</button>
+    </div>
+
+    <!-- CHALLENGE controls -->
+    <div id="ctrl-challenge" style="display:none;align-items:center;gap:8px;">
+      <div class="tog-group">
+        <button class="tog active" data-ctype="months">Months</button>
+        <button class="tog" data-ctype="dates">Dates</button>
+        <button class="tog" data-ctype="combo">Both</button>
+      </div>
+      <div class="tb-div"></div>
+      <div id="tb-speed">
+        <span id="tb-speed-lbl">Speed</span>
+        <input type="range" id="speed-slider" min="1" max="12" value="5" step="1">
+        <span id="tb-speed-val">5s</span>
+      </div>
+      <button class="tb-btn" id="btn-chal-rand">✦</button>
+      <button class="tb-btn accent-chal" id="btn-chal-go">▶ Start</button>
+    </div>
+
+    <!-- HOLIDAYS controls -->
+    <div id="ctrl-holidays" style="display:none;align-items:center;gap:8px;">
+      <button class="tb-btn" id="h-prev">←</button>
+      <div class="tb-counter" id="h-counter"></div>
+      <button class="tb-btn" id="h-next">→</button>
+      <div class="tb-div"></div>
+      <button class="tb-btn accent-hol" id="btn-hol-reveal">Show Answer</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ CONTENT ══ -->
+<div id="content">
+
+  <div class="pane active" id="pane-review">
+    <div class="card-anim" id="r-card"></div>
+    <div id="r-grid"><div class="g-grid" id="r-grid-inner"></div></div>
+  </div>
+
+  <div class="pane" id="pane-challenge">
+    <div class="card-anim" id="c-card">
+      <div style="font-size:clamp(24px,5vh,48px);font-weight:900;color:var(--muted)">Press Start or ✦</div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-holidays">
+    <div class="card-anim" id="h-card"></div>
+  </div>
+
+</div>
+
+<div id="timer-float">
+  <svg id="timer-svg" viewBox="0 0 90 90">
+    <circle id="timer-bg"  cx="45" cy="45" r="37"/>
+    <circle id="timer-arc" cx="45" cy="45" r="37"/>
+  </svg>
+  <div id="timer-num">—</div>
+</div>
+
+<script>
+const MONTHS = [
+  {name:'January',   emoji:'❄️',  color:'var(--jan)'},
+  {name:'February',  emoji:'💕',  color:'var(--feb)'},
+  {name:'March',     emoji:'🌸',  color:'var(--mar)'},
+  {name:'April',     emoji:'🌿',  color:'var(--apr)'},
+  {name:'May',       emoji:'🌼',  color:'var(--may)'},
+  {name:'June',      emoji:'☀️',  color:'var(--jun)'},
+  {name:'July',      emoji:'🎆',  color:'var(--jul)'},
+  {name:'August',    emoji:'🌊',  color:'var(--aug)'},
+  {name:'September', emoji:'🍂',  color:'var(--sep)'},
+  {name:'October',   emoji:'🎃',  color:'var(--oct)'},
+  {name:'November',  emoji:'🍁',  color:'var(--nov)'},
+  {name:'December',  emoji:'⛄',  color:'var(--dec)'},
+];
+
+const HOLIDAYS = [
+  {emoji:'🎍', en:"New Year's Day",          ja:'元日',            month:'January',   day:1 },
+  {emoji:'🎎', en:"Coming of Age Day",        ja:'成人の日',         month:'January',   day:13},
+  {emoji:'💘', en:"Valentine's Day",          ja:'バレンタインデー',  month:'February',  day:14},
+  {emoji:'🎂', en:"Emperor's Birthday",       ja:'天皇誕生日',       month:'February',  day:23},
+  {emoji:'👧', en:"Hinamatsuri (Girls' Day)", ja:'ひな祭り',         month:'March',     day:3 },
+  {emoji:'🌹', en:"International Women's Day",ja:'国際女性デー',     month:'March',     day:8 },
+  {emoji:'🌺', en:"Vernal Equinox Day",       ja:'春分の日',         month:'March',     day:20},
+  {emoji:'🍀', en:"St. Patrick's Day",        ja:'聖パトリックの日',  month:'March',     day:17},
+  {emoji:'🌍', en:"Earth Day",                ja:'地球の日',         month:'April',     day:22},
+  {emoji:'🎏', en:"Children's Day",           ja:'こどもの日',       month:'May',       day:5 },
+  {emoji:'👩', en:"Mother's Day",             ja:'母の日',           month:'May',       day:11},
+  {emoji:'👨', en:"Father's Day",             ja:'父の日',           month:'June',      day:15},
+  {emoji:'🌊', en:"Marine Day",               ja:'海の日',           month:'July',      day:15},
+  {emoji:'⭐', en:"Tanabata",                 ja:'七夕',             month:'July',      day:7 },
+  {emoji:'🏔️', en:"Mountain Day",             ja:'山の日',           month:'August',    day:11},
+  {emoji:'🏮', en:"Obon Festival",            ja:'お盆',             month:'August',    day:15},
+  {emoji:'🕊️', en:"International Peace Day",  ja:'国際平和デー',     month:'September', day:21},
+  {emoji:'🎑', en:"Moon Viewing (Otsukimi)",   ja:'お月見',           month:'September', day:17},
+  {emoji:'🍂', en:"Autumnal Equinox Day",      ja:'秋分の日',         month:'September', day:23},
+  {emoji:'👴', en:"Respect for the Aged Day",  ja:'敬老の日',         month:'September', day:16},
+  {emoji:'💪', en:"Health and Sports Day",     ja:'スポーツの日',     month:'October',   day:14},
+  {emoji:'🎃', en:"Halloween",                 ja:'ハロウィン',       month:'October',   day:31},
+  {emoji:'🏛️', en:"Culture Day",               ja:'文化の日',         month:'November',  day:3 },
+  {emoji:'💀', en:"Day of the Dead",           ja:'死者の日',         month:'November',  day:2 },
+  {emoji:'💪', en:"Labour Thanksgiving Day",   ja:'勤労感謝の日',     month:'November',  day:23},
+  {emoji:'🦃', en:"Thanksgiving",              ja:'感謝祭',           month:'November',  day:28},
+  {emoji:'🎄', en:"Christmas Day",             ja:'クリスマス',       month:'December',  day:25},
+  {emoji:'❄️', en:"Winter Solstice",           ja:'冬至',             month:'December',  day:22},
+  {emoji:'🎆', en:"New Year's Eve",            ja:'大晦日',           month:'December',  day:31},
+];
+
+const OC={1:'var(--c1)',2:'var(--c2)',3:'var(--c3)',4:'var(--c4)',5:'var(--c5)',
+          6:'var(--c6)',7:'var(--c7)',8:'var(--c8)',9:'var(--c9)'};
+const OW=['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth'];
+const TW={11:'eleventh',12:'twelfth',13:'thirteenth',14:'fourteenth',15:'fifteenth',
+          16:'sixteenth',17:'seventeenth',18:'eighteenth',19:'nineteenth'};
+
+function suf(n){
+  if(n===11||n===12||n===13)return 'th';
+  const r=n%10;return r===1?'st':r===2?'nd':r===3?'rd':'th';
+}
+
+function numH(n,col,sc='suf'){
+  const s=suf(n);
+  if(!col)return`<span style="color:var(--white)">${n}<span class="${sc}">${s}</span></span>`;
+  if(n>=1&&n<=9) return`<span style="color:${OC[n]}">${n}<span class="${sc}">${s}</span></span>`;
+  if(n===10)      return`<span style="color:var(--c10)">10<span class="${sc}">th</span></span>`;
+  if(n>=11&&n<=19)return`<span style="color:var(--teens)">${n}<span class="${sc}">th</span></span>`;
+  if(n===20)      return`<span style="color:var(--tens)">20<span class="${sc}">th</span></span>`;
+  if(n===30)      return`<span style="color:var(--tens)">30<span class="${sc}">th</span></span>`;
+  const td=Math.floor(n/10),od=n%10;
+  return`<span style="color:var(--tens)">${td}</span><span style="color:${OC[od]}">${od}<span class="${sc}">${s}</span></span>`;
+}
+
+function wordH(n,col){
+  if(!col){
+    if(n>=1&&n<=9)  return`<span style="color:var(--white)">${OW[n]}</span>`;
+    if(n===10)       return`<span style="color:var(--white)">tenth</span>`;
+    if(n>=11&&n<=19) return`<span style="color:var(--white)">${TW[n]}</span>`;
+    if(n===20)       return`<span style="color:var(--white)">twentieth</span>`;
+    if(n===30)       return`<span style="color:var(--white)">thirtieth</span>`;
+    const t=Math.floor(n/10)*10,od=n%10;
+    return`<span style="color:var(--white)">${t===20?'twenty':'thirty'}-${OW[od]}</span>`;
+  }
+  if(n>=1&&n<=9)  return`<span style="color:${OC[n]}">${OW[n]}</span>`;
+  if(n===10)       return`<span style="color:var(--c10)">tenth</span>`;
+  if(n>=11&&n<=19) return`<span style="color:var(--teens)">${TW[n]}</span>`;
+  if(n===20)       return`<span style="color:var(--tens)">twentieth</span>`;
+  if(n===30)       return`<span style="color:var(--tens)">thirtieth</span>`;
+  const t=Math.floor(n/10)*10,od=n%10;
+  return`<span style="color:var(--tens)">${t===20?'twenty':'thirty'}-</span><span style="color:${OC[od]}">${OW[od]}</span>`;
+}
+
+function flash(el,html){
+  el.style.animation='none'; el.offsetHeight; el.style.animation='';
+  el.innerHTML=html;
+}
+
+function rMonth(m,col=true){
+  const c=col?m.color:'var(--white)';
+  return`<div><span class="m-emoji">${m.emoji}</span><div class="m-name" style="color:${c}">${m.name}</div></div>`;
+}
+function rDate(n,col=true){
+  return`<div class="d-wrap"><div class="d-num">${numH(n,col)}</div><div class="d-word">${wordH(n,col)}</div></div>`;
+}
+function rCombo(m,n,col=false){
+  const c=col?m.color:'var(--white)';
+  return`<div class="co-wrap">
+    <div class="co-month"><span>${m.emoji}</span><span style="color:${c}">${m.name}</span></div>
+    <div class="co-num">${numH(n,col)}</div>
+    <div class="co-word">${wordH(n,col)}</div>
+  </div>`;
+}
+
+function rItem(item,col=true){
+  if(item.type==='month') return rMonth(MONTHS[item.i],col);
+  if(item.type==='date')  return rDate(item.n,col);
+  if(item.type==='combo') return rCombo(MONTHS[item.mi],item.n,col);
+}
+
+const monthSeq=()=>MONTHS.map((_,i)=>({type:'month',i}));
+const dateSeq =()=>Array.from({length:31},(_,i)=>({type:'date',n:i+1}));
+const comboSeq=()=>{
+  const picks=[1,5,8,10,14,17,20,23,28,31],out=[];
+  MONTHS.forEach((_,mi)=>picks.forEach(d=>{
+    if(mi===1&&d>28)return;
+    out.push({type:'combo',mi,n:d});
+  }));
+  return out;
+};
+function seqFor(t){return t==='months'?monthSeq():t==='dates'?dateSeq():comboSeq();}
+
+let currentMode='review';
+
+function setMode(m){
+  currentMode=m;
+  document.querySelectorAll('.mode-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  document.getElementById('ctrl-review').style.display    = m==='review'    ? 'flex':'none';
+  document.getElementById('ctrl-challenge').style.display = m==='challenge' ? 'flex':'none';
+  document.getElementById('ctrl-holidays').style.display  = m==='holidays'  ? 'flex':'none';
+  document.getElementById('pane-review').classList.toggle('active',    m==='review');
+  document.getElementById('pane-challenge').classList.toggle('active', m==='challenge');
+  document.getElementById('pane-holidays').classList.toggle('active',  m==='holidays');
+  if(m==='holidays') hRender();
+  if(m!=='challenge'&&cRunning) cStop();
+  if(m==='challenge') document.getElementById('timer-float').classList.add('visible');
+  else document.getElementById('timer-float').classList.remove('visible');
+}
+
+document.querySelectorAll('.mode-tab').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+
+let rType='months', rSeq=monthSeq(), rIdx=0, rGridOn=false;
+
+function rRender(){
+  flash(document.getElementById('r-card'), rItem(rSeq[rIdx],true));
+  document.getElementById('r-counter').textContent=`${rIdx+1} / ${rSeq.length}`;
+}
+
+function rSetType(t){
+  rType=t; rSeq=seqFor(t); rIdx=0;
+  document.querySelectorAll('[data-rtype]').forEach(b=>b.classList.toggle('active',b.dataset.rtype===t));
+  if(rGridOn) rBuildGrid(); else rRender();
+}
+
+function rBuildGrid(){
+  const inner=document.getElementById('r-grid-inner');
+  inner.className='g-grid '+(rType==='months'?'months':'dates');
+  inner.innerHTML='';
+  if(rType==='months'){
+    MONTHS.forEach(m=>{
+      inner.innerHTML+=`<div class="g-cell"><div class="ge">${m.emoji}</div><div class="gn" style="color:${m.color}">${m.name}</div></div>`;
+    });
+  } else {
+    for(let n=1;n<=31;n++){
+      inner.innerHTML+=`<div class="g-cell"><div class="gd">${numH(n,true,'gs')}</div><div class="gw">${wordH(n,true)}</div></div>`;
+    }
+  }
+}
+
+function rToggleGrid(){
+  rGridOn=!rGridOn;
+  const btn=document.getElementById('r-grid-btn');
+  btn.classList.toggle('on',rGridOn);
+  btn.textContent=rGridOn?'⊟ Grid':'⊞ Grid';
+  document.getElementById('r-card').style.display=rGridOn?'none':'';
+  document.getElementById('r-grid').classList.toggle('active',rGridOn);
+  document.getElementById('pane-review').style.alignItems=rGridOn?'flex-start':'center';
+  document.getElementById('r-prev').style.opacity=rGridOn?'0.3':'1';
+  document.getElementById('r-next').style.opacity=rGridOn?'0.3':'1';
+  document.getElementById('r-prev').style.pointerEvents=rGridOn?'none':'auto';
+  document.getElementById('r-next').style.pointerEvents=rGridOn?'none':'auto';
+  if(rGridOn) rBuildGrid();
+}
+
+document.querySelectorAll('[data-rtype]').forEach(b=>b.addEventListener('click',()=>rSetType(b.dataset.rtype)));
+document.getElementById('r-next').addEventListener('click',()=>{rIdx=(rIdx+1)%rSeq.length;rRender();});
+document.getElementById('r-prev').addEventListener('click',()=>{rIdx=(rIdx-1+rSeq.length)%rSeq.length;rRender();});
+document.getElementById('r-grid-btn').addEventListener('click',rToggleGrid);
+document.getElementById('pane-review').addEventListener('click',e=>{
+  if(!rGridOn&&e.target.closest('#r-card')){rIdx=(rIdx+1)%rSeq.length;rRender();}
+});
+
+let cType='months',cSeq=monthSeq(),cRunning=false,cInterval=null,cSecs=5,cRemain=5;
+const ARC=233;
+
+function cFlash(){
+  const i=Math.floor(Math.random()*cSeq.length);
+  flash(document.getElementById('c-card'), rItem(cSeq[i],false));
+}
+
+function cUpdateTimer(){
+  const frac=cRemain/cSecs;
+  document.getElementById('timer-arc').style.strokeDashoffset=ARC*(1-frac);
+  document.getElementById('timer-num').textContent=cRemain;
+}
+
+function cStart(){
+  cRunning=true;
+  const btn=document.getElementById('btn-chal-go');
+  btn.textContent='⏹ Stop';
+  btn.classList.remove('accent-chal');
+  btn.style.background='var(--surface2)';
+  btn.style.color='var(--muted)';
+  btn.style.borderColor='var(--border)';
+  document.getElementById('timer-float').classList.add('visible');
+  cRemain=cSecs; cUpdateTimer(); cFlash();
+  cInterval=setInterval(()=>{
+    cRemain--; cUpdateTimer();
+    if(cRemain<=0){cRemain=cSecs; cFlash();}
+  },1000);
+}
+
+function cStop(){
+  cRunning=false; clearInterval(cInterval);
+  const btn=document.getElementById('btn-chal-go');
+  btn.textContent='▶ Start';
+  btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
+  btn.classList.add('accent-chal');
+  document.getElementById('timer-num').textContent='—';
+  document.getElementById('timer-arc').style.strokeDashoffset=0;
+}
+
+function cSetType(t){
+  cType=t; cSeq=seqFor(t);
+  document.querySelectorAll('[data-ctype]').forEach(b=>b.classList.toggle('active',b.dataset.ctype===t));
+  if(cRunning){cStop();cStart();}
+}
+
+document.getElementById('btn-chal-go').addEventListener('click',()=>cRunning?cStop():cStart());
+document.getElementById('btn-chal-rand').addEventListener('click',()=>{
+  if(cRunning)cStop();
+  cFlash();
+  document.getElementById('timer-num').textContent='—';
+  document.getElementById('timer-arc').style.strokeDashoffset=0;
+});
+document.getElementById('speed-slider').addEventListener('input',function(){
+  cSecs=+this.value;
+  document.getElementById('tb-speed-val').textContent=cSecs+'s';
+  if(cRunning){cStop();cStart();}
+});
+document.querySelectorAll('[data-ctype]').forEach(b=>b.addEventListener('click',()=>cSetType(b.dataset.ctype)));
+
+let hList=[...HOLIDAYS].sort(()=>Math.random()-0.5),hIdx=0,hRevealed=false;
+
+function hRender(){
+  hRevealed=false;
+  const h=hList[hIdx];
+  const el=document.getElementById('h-card');
+  el.style.animation='none'; el.offsetHeight; el.style.animation='';
+  el.innerHTML=`<span class="h-emoji">${h.emoji}</span>
+    <div class="h-en">${h.en}</div>
+    <div class="h-ja">${h.ja}</div>
+    <div id="h-ans-area"></div>`;
+  document.getElementById('btn-hol-reveal').style.opacity='1';
+  document.getElementById('btn-hol-reveal').style.pointerEvents='auto';
+  document.getElementById('h-counter').textContent=`${hIdx+1} / ${hList.length}`;
+}
+
+function hReveal(){
+  if(hRevealed)return; hRevealed=true;
+  const h=hList[hIdx];
+  document.getElementById('h-ans-area').innerHTML=`<div class="h-ans">${h.month} ${h.day}${suf(h.day)}</div>`;
+  document.getElementById('btn-hol-reveal').style.opacity='0.35';
+  document.getElementById('btn-hol-reveal').style.pointerEvents='none';
+}
+
+document.getElementById('btn-hol-reveal').addEventListener('click',hReveal);
+document.getElementById('h-next').addEventListener('click',()=>{hIdx=(hIdx+1)%hList.length;hRender();});
+document.getElementById('h-prev').addEventListener('click',()=>{hIdx=(hIdx-1+hList.length)%hList.length;hRender();});
+
+document.addEventListener('keydown',e=>{
+  if(currentMode==='review'&&!rGridOn){
+    if(e.key==='ArrowRight'||e.key===' '){rIdx=(rIdx+1)%rSeq.length;rRender();}
+    if(e.key==='ArrowLeft'){rIdx=(rIdx-1+rSeq.length)%rSeq.length;rRender();}
+  }
+  if(currentMode==='holidays'){
+    if(e.key==='ArrowRight'||e.key===' ') hReveal();
+    if(e.key==='ArrowLeft'){hIdx=(hIdx-1+hList.length)%hList.length;hRender();}
+    if(e.key==='ArrowRight'&&hRevealed){hIdx=(hIdx+1)%hList.length;hRender();}
+  }
+});
+
+rRender();
+hRender();
+document.getElementById('timer-float').classList.add('visible');
+</script>
+</body>
+</html>
